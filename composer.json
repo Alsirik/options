@@ -1,0 +1,28 @@
+{
+    "name": "siryk/options",
+    "description": "description",
+    "minimum-stability": "stable",
+    "license": "proprietary",
+    "authors": [
+        {
+            "name": "Oleksandr",
+            "email": "email@example.com"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Siryk\\Options\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Siryk\\Options\\Tests\\": "tests/"
+        }
+    },
+    "require": {
+        "php": "^7.2 || ^8.0"
+    },
+    "require-dev": {
+        "phpunit/phpunit": "^7.5.15 || ^8.5 || ^9.0"
+    }
+}
