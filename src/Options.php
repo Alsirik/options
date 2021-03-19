@@ -2,11 +2,17 @@
 
 namespace Siryk\Options;
 
+use LogicException;
+
 class Options
 {
-    protected $options = [];
-
+    protected $values = [];
     private $callbacks = [];
+    private $required = [];
+    /**
+     * @var array
+     */
+    private $available = [];
 
     public function __construct($values = [])
     {
@@ -19,6 +25,32 @@ class Options
         $this->callbacks[$key] = $callable;
     }
 
+    function addRequiredField($field)
+    {
+        if (is_array($field)) {
+            foreach ($field as $item) {
+                $this->addRequiredField($item);
+            }
+        } else {
+            if (!in_array($field, $this->required)) {
+                $this->required[] = $this->keyNormalize($field);
+            }
+        }
+    }
+
+    function addAvailableField($field)
+    {
+        if (is_array($field)) {
+            foreach ($field as $item) {
+                $this->addAvailableField($item);
+            }
+        } else {
+            if (!in_array($field, $this->required)) {
+                $this->available[] = $this->keyNormalize($field);
+            }
+        }
+    }
+
     public function setMany(iterable $array)
     {
         foreach ($array as $key => $value) {
@@ -29,19 +61,19 @@ class Options
     public function set(string $key, $value)
     {
         $key = $this->keyNormalize($key);
-        $this->options[$key] = $value;
+        $this->values[$key] = $value;
     }
 
     public function has(string $key): bool
     {
         $key = $this->keyNormalize($key);
-        return array_key_exists($key, $this->options);
+        return array_key_exists($key, $this->values);
     }
 
     public function get(string $key, $default = null)
     {
         $key = $this->keyNormalize($key);
-        return $this->has($key) ? $this->options[$key] : $this->getDefaultValue($key, $default);
+        return $this->has($key) ? $this->values[$key] : $this->getDefaultValue($key, $default);
     }
 
     private function getDefaultValue($key, $userDefault)
@@ -57,5 +89,61 @@ class Options
     {
         return trim($key);
     }
+
+    public function only(array $array, $default = null): array
+    {
+        $res = [];
+        foreach ($array as $field) {
+            $res[$field] = $this->get($field, $default);
+        }
+        return $res;
+    }
+
+    private function getAllFields(): array
+    {
+        $callbacks = array_keys($this->callbacks);
+        $values = array_keys($this->values);
+        return array_unique(array_merge($values, $callbacks));
+    }
+
+    private function checkMissingRequired(array $existingFields)
+    {
+        $requiredFields = $this->required;
+        $need = array_diff($requiredFields, $existingFields);
+        if (count($need)) {
+            throw new LogicException('missing required option(s): "' . implode('", "', $need) . '"');
+        }
+    }
+
+    private function checkUnrecognizedFields(array $existingFields)
+    {
+        $available = $this->available;
+        if (count($available) == 0) {
+            return;
+        }
+        $available = array_unique(array_merge($available, $this->required, array_keys($this->callbacks)));
+        $unrecognized = array_diff($existingFields, $available);
+
+        if (count($unrecognized)) {
+            $message = 'unrecognized options "' . implode('", "', $unrecognized) . '". '
+                . 'Available options is: "' . implode('", "', $available) . '".';
+            throw new LogicException($message);
+        }
+
+    }
+
+    /**
+     * @return array
+     * @throws LogicException
+     */
+    public function getAll(): array
+    {
+        $availableFields = $this->getAllFields();
+        $this->checkMissingRequired($availableFields);
+        $this->checkUnrecognizedFields($availableFields);
+
+        return $this->only($availableFields);
+    }
+
 
 }
