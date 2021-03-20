@@ -2,11 +2,10 @@
     "name": "siryk/options",
     "description": "description",
     "minimum-stability": "stable",
-    "license": "proprietary",
+    "license": "MIT",
     "authors": [
         {
-            "name": "Oleksandr",
-            "email": "email@example.com"
+            "name": "Oleksandr"
         }
     ],
     "autoload": {
