@@ -1,11 +1,11 @@
 {
     "name": "siryk/options",
-    "description": "description",
+    "description": "some description",
     "minimum-stability": "stable",
     "license": "MIT",
     "authors": [
         {
-            "name": "Oleksandr"
+            "name": "Oleksandr Siryk"
         }
     ],
     "autoload": {
