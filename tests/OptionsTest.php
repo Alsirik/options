@@ -121,4 +121,15 @@ class OptionsTest extends TestCase
         $options->getAll();
     }
 
+    public function testDefaultCallbackIsRunOnce()
+    {
+        $options = new Options();
+        $options->setDefaultCallback('some', function () {
+            return uniqid('', true);
+        });
+        $first = $options->get('some');
+        $second = $options->get('some');
+        self::assertSame($first, $second);
+    }
+
 }

@@ -31,10 +31,13 @@ class Options
         $this->setMany($values);
     }
 
-    function setDefaultCallback($key, callable $callable): self
+    function setDefaultCallback($key, callable $callable, $once = true): self
     {
         $key = $this->keyNormalize($key);
-        $this->callbacks[$key] = $callable;
+        $this->callbacks[$key] = [
+            'call' => $callable,
+            'once' => $once,
+        ];
         return $this;
     }
 
@@ -110,7 +113,11 @@ class Options
     {
         $callback = $this->callbacks[$key] ?? null;
         if ($callback) {
-            return $callback($this, $key, $userDefault);
+            $res = $callback['call']($this, $key, $userDefault);
+            if ($callback['once']) {
+                $this->set($key, $res);
+            }
+            return $res;
         }
         return $userDefault;
     }
