@@ -6,26 +6,42 @@ use LogicException;
 
 class Options
 {
-    protected $values = [];
-    private $callbacks = [];
-    private $required = [];
     /**
-     * @var array
+     * @var array Options values
      */
-    private $available = [];
+    protected $values = [];
+
+    /**
+     * @var array default value getters
+     */
+    protected $callbacks = [];
+
+    /**
+     * @var array list of required fields
+     */
+    protected $required = [];
+
+    /**
+     * @var array list of available fields
+     */
+    protected $available = [];
 
     public function __construct($values = [])
     {
         $this->setMany($values);
     }
 
-    function setDefaultCallback($key, callable $callable)
+    function setDefaultCallback($key, callable $callable): self
     {
         $key = $this->keyNormalize($key);
         $this->callbacks[$key] = $callable;
+        return $this;
     }
 
-    function addRequiredField($field)
+    /**
+     * @param string|array $field
+     */
+    public function addRequiredField($field)
     {
         if (is_array($field)) {
             foreach ($field as $item) {
@@ -38,7 +54,7 @@ class Options
         }
     }
 
-    function addAvailableField($field)
+    public function addAvailableField($field)
     {
         if (is_array($field)) {
             foreach ($field as $item) {
@@ -76,7 +92,7 @@ class Options
         return $this->has($key) ? $this->values[$key] : $this->getDefaultValue($key, $default);
     }
 
-    private function getDefaultValue($key, $userDefault)
+    protected function getDefaultValue($key, $userDefault)
     {
         $callback = $this->callbacks[$key] ?? null;
         if ($callback) {
@@ -85,7 +101,7 @@ class Options
         return $userDefault;
     }
 
-    private function keyNormalize($key): string
+    protected function keyNormalize($key): string
     {
         return trim($key);
     }
@@ -99,14 +115,14 @@ class Options
         return $res;
     }
 
-    private function getAllFields(): array
+    protected function getAllFields(): array
     {
         $callbacks = array_keys($this->callbacks);
         $values = array_keys($this->values);
         return array_unique(array_merge($values, $callbacks));
     }
 
-    private function checkMissingRequired(array $existingFields)
+    protected function checkMissingRequired(array $existingFields)
     {
         $requiredFields = $this->required;
         $need = array_diff($requiredFields, $existingFields);
@@ -115,7 +131,7 @@ class Options
         }
     }
 
-    private function checkUnrecognizedFields(array $existingFields)
+    protected function checkUnrecognizedFields(array $existingFields)
     {
         $available = $this->available;
         if (count($available) == 0) {
