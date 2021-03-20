@@ -40,8 +40,9 @@ class Options
 
     /**
      * @param string|array $field
+     * @return $this
      */
-    public function addRequiredField($field)
+    public function addRequiredField($field): self
     {
         if (is_array($field)) {
             foreach ($field as $item) {
@@ -52,9 +53,14 @@ class Options
                 $this->required[] = $this->keyNormalize($field);
             }
         }
+        return $this;
     }
 
-    public function addAvailableField($field)
+    /**
+     * @param $field
+     * @return $this
+     */
+    public function addAvailableField($field): self
     {
         if (is_array($field)) {
             foreach ($field as $item) {
@@ -65,19 +71,27 @@ class Options
                 $this->available[] = $this->keyNormalize($field);
             }
         }
+        return $this;
     }
 
-    public function setMany(iterable $array)
+    /**
+     * @param iterable $array
+     * @return $this
+     */
+    public function setMany(iterable $array): self
     {
         foreach ($array as $key => $value) {
             $this->set($key, $value);
         }
+        return $this;
     }
 
-    public function set(string $key, $value)
+
+    public function set(string $key, $value): self
     {
         $key = $this->keyNormalize($key);
         $this->values[$key] = $value;
+        return $this;
     }
 
     public function has(string $key): bool
